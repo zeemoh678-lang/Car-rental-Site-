@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Car Rental Booking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+    }
+    header {
+      background: #0f172a;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    header button {
+      background: #22c55e;
+      border: none;
+      padding: .55rem 1rem;
+      border-radius: .4rem;
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    section {
+      padding: 2rem 1rem;
+      max-width: 900px;
+      margin: auto;
+    }
+    h2 {
+      margin-top: 0;
+      color: #22c55e;
+    }
+    .car-container {
+      display: grid;
+      gap: 1.25rem;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    }
+    .car-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 1rem;
+      border-radius: .8rem;
+    }
+    .car-card h3 {
+      margin: 0 0 .25rem 0;
+      font-size: 1.15rem;
+    }
+    .car-card button {
+      background: #22c55e;
+      color: #000;
+      font-weight: 600;
+      padding: .5rem .75rem;
+      border: none;
+      border-radius: .4rem;
+      cursor: pointer;
+      margin-top: .5rem;
+      width: 100%;
+    }
+    form {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 1.25rem;
+      border-radius: .8rem;
+    }
+    form label {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: .25rem;
+      font-weight: 500;
+    }
+    form input,
+    form select,
+    form textarea {
+      width: 100%;
+      padding: .55rem;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: .4rem;
+      color: #e5e7eb;
+    }
+    #formStatus {
+      margin-top: 1rem;
+      padding: .75rem;
+      border-radius: .5rem;
+      font-weight: 600;
+    }
+    .error { background: #7f1d1d; color: #fff; }
+    .success { background: #14532d; color: #bbf7d0; }
+
+    /* Calendar */
+    .calendar-wrapper {
+      margin-top: 2rem;
+      background: #0f172a;
+      padding: 1rem;
+      border: 1px solid #1e293b;
+      border-radius: .8rem;
+    }
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .75rem;
+    }
+    .calendar-header button {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e5e7eb;
+      padding: .4rem .75rem;
+      border-radius: .4rem;
+      cursor: pointer;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: .25rem;
+    }
+    .calendar-day-label {
+      text-align: center;
+      font-size: .8rem;
+      color: #9ca3af;
+      padding-bottom: .25rem;
+    }
+    .calendar-cell {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: .35rem;
+      font-size: .85rem;
+    }
+    .is-booked {
+      background: #7f1d1d;
+      color: #fff;
+    }
+    .is-available {
+      background: #14532d;
+      color: #bbf7d0;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Car Rental</h1>
+  <button id="scrollToBooking">Book a car</button>
+</header>
+
+<section>
+  <h2>Available Vehicles</h2>
+  <div class="car-container" id="fleetGrid"></div>
+</section>
+
+<section id="bookingSection">
+  <h2>Make a Booking</h2>
+
+  <form id="bookingForm">
+    <label>Choose car</label>
+    <select name="car" id="car"></select>
+
+    <label>Start date</label>
+    <input type="date" name="startDate" id="startDate" required>
+
+    <label>End date</label>
+    <input type="date" name="endDate" id="endDate" required>
+
+    <label>Pickup time</label>
+    <input type="time" name="pickupTime" required>
+
+    <label>Dropoff time</label>
+    <input type="time" name="dropoffTime" required>
+
+    <label>Full name</label>
+    <input type="text" name="fullName" required>
+
+    <label>Email</label>
+    <input type="email" name="email" required>
+
+    <label>Phone</label>
+    <input type="tel" name="phone" required>
+
+    <label>Age</label>
+    <input type="number" name="age" required min="18">
+
+    <label>Address</label>
+    <input type="text" name="address" required>
+
+    <label>Driving Licence Number</label>
+    <input type="text" name="licenseNumber" required>
+
+    <label>Upload ID (photo or PDF)</label>
+    <input type="file" id="idUpload" accept=".jpg,.jpeg,.png,.pdf" required>
+
+    <label>Notes (optional)</label>
+    <textarea name="notes"></textarea>
+
+    <button type="submit" style="margin-top:1rem;background:#22c55e;color:#000;font-weight:600;padding:.75rem;border-radius:.4rem;border:none;cursor:pointer;">
+      Submit Booking
+    </button>
+
+    <div id="formStatus"></div>
+  </form>
+
+  <button id="depositButton" style="margin-top:1rem;background:#22c55e;color:#000;font-weight:600;padding:.75rem;border-radius:.4rem;border:none;cursor:pointer;">
+    Pay £50 Deposit
+  </button>
+</section>
+
+<section>
+  <h2>Check Availability</h2>
+  <div class="calendar-wrapper">
+    <div class="calendar-header">
+      <button id="prevMonthBtn">←</button>
+      <span id="calendarMonthLabel"></span>
+      <button id="nextMonthBtn">→</button>
+    </div>
+    <label>Select Car</label>
+    <select id="calendarCarSelect" style="margin-bottom:.75rem;"></select>
+
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </div>
+</section>
+
+<!-- ================================ -->
+<!--       FRONT-END SCRIPT           -->
+<!-- ================================ -->
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+  /* ---------------------------------------------
+     SUPABASE CLIENT (YOUR REAL VALUES INCLUDED)
+  ----------------------------------------------*/
+  const supabase = createClient(
+    "https://uhohcsohvhqjytdycasy.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2hjc29odmhxanl0ZHljYXN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyNTc5MzYsImV4cCI6MjA3OTgzMzkzNn0.-_q6edhpzPm5i_8LFqiNNbLTJdlOEEDLPV6WvNhI-qc"
+  );
+
+  /* ---------------------------------------------
+     SAMPLE CAR LIST (EDIT LATER IF YOU LIKE)
+  ----------------------------------------------*/
+  const vehicles = [
+    {
+      id: "compact",
+      name: "VW Golf or similar",
+      type: "Compact",
+      seats: 5,
+      transmission: "Automatic",
+      pricePerDay: 55,
+      deposit: 50,
+      bookedDates: []
+    },
+    {
+      id: "suv",
+      name: "Nissan Qashqai or similar",
+      type: "SUV",
+      seats: 5,
+      transmission: "Manual",
+      pricePerDay: 75,
+      deposit: 50,
+      bookedDates: []
+    },
+    {
+      id: "van",
+      name: "Ford Transit or similar",
+      type: "Van",
+      seats: 3,
+      transmission: "Manual",
+      pricePerDay: 85,
+      deposit: 50,
+      bookedDates: []
+    }
+  ];
+
+  /* ---------------------------------------------
+      DOM ELEMENTS
+  ----------------------------------------------*/
+  const fleetGrid = document.getElementById("fleetGrid");
+  const bookingForm = document.getElementById("bookingForm");
+  const formStatus = document.getElementById("formStatus");
+  const carSelect = document.getElementById("car");
+  const calendarGrid = document.getElementById("calendarGrid");
+  const calendarMonthLabel = document.getElementById("calendarMonthLabel");
+  const calendarCarSelect = document.getElementById("calendarCarSelect");
+  const depositButton = document.getElementById("depositButton");
+
+  let lastBookingId = null;
+
+  function formatMoney(amount) {
+    return "£" + amount.toFixed(2);
+  }
+
+  /* ---------------------------------------------
+      RENDER CAR LIST
+  ----------------------------------------------*/
+  function renderFleet() {
+    fleetGrid.innerHTML = "";
+    vehicles.forEach(car => {
+      const card = document.createElement("div");
+      card.className = "car-card";
+
+      card.innerHTML = `
+        <h3>${car.name}</h3>
+        <p>${car.type} • ${car.seats} seats • ${car.transmission}</p>
+        <p><strong>${formatMoney(car.pricePerDay)}/day</strong></p>
+        <button data-id="${car.id}">Book this car</button>
+      `;
+
+      card.querySelector("button").onclick = () => {
+        carSelect.value = car.id;
+        document.getElementById("bookingSection").scrollIntoView({behavior:"smooth"});
+      };
+
+      fleetGrid.appendChild(card);
+    });
+  }
+
+  /* ---------------------------------------------
+      POPULATE CAR SELECTS
+  ----------------------------------------------*/
+  function populateCarSelects() {
+    vehicles.forEach(car => {
+      const opt = document.createElement("option");
+      opt.value = car.id;
+      opt.textContent = `${car.name}`;
+      carSelect.appendChild(opt);
+
+      const opt2 = opt.cloneNode(true);
+      calendarCarSelect.appendChild(opt2);
+    });
+  }
+
+  /* ---------------------------------------------
+      CALENDAR LOGIC
+  ----------------------------------------------*/
+  const today = new Date();
+  let currentMonth = today.getMonth();
+  let currentYear = today.getFullYear();
+
+  function updateCalendar() {
+    const carId = calendarCarSelect.value;
+    const car = vehicles.find(v => v.id === carId);
+
+    const monthNames = [
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December"
+    ];
+    calendarMonthLabel.textContent =
+      `${monthNames[currentMonth]} ${currentYear}`;
+
+    calendarGrid.innerHTML = "";
+
+    const dayLabels = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    dayLabels.forEach(d => {
+      const lbl = document.createElement("div");
+      lbl.className = "calendar-day-label";
+      lbl.textContent = d;
+      calendarGrid.appendChild(lbl);
+    });
+
+    const first = new Date(currentYear, currentMonth, 1);
+    const startOffset = (first.getDay() + 6) % 7;
+    const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+
+    for (let i=0; i<startOffset; i++) {
+      const empty = document.createElement("div");
+      empty.className = "calendar-cell";
+      calendarGrid.appendChild(empty);
+    }
+
+    for (let day=1; day<=daysInMonth; day++) {
+      const date = `${currentYear}-${String(currentMonth+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+      const cell = document.createElement("div");
+      cell.className = "calendar-cell " +
+        (car.bookedDates.includes(date) ? "is-booked" : "is-available");
+      cell.textContent = day;
+      calendarGrid.appendChild(cell);
+    }
+  }
+
+  document.getElementById("prevMonthBtn").onclick = () => {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    updateCalendar();
+  };
+  document.getElementById("nextMonthBtn").onclick = () => {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    updateCalendar();
+  };
+  calendarCarSelect.onchange = updateCalendar;
+
+  /* ---------------------------------------------
+      BOOKING FORM SUBMIT
+  ----------------------------------------------*/
+  bookingForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    formStatus.textContent = "";
+    formStatus.className = "";
+
+    const fd = new FormData(bookingForm);
+
+    const start = fd.get("startDate");
+    const end = fd.get("endDate");
+    if (end < start) {
+      formStatus.textContent = "End date must be after start date.";
+      formStatus.className = "error";
+      return;
+    }
+
+    /* Upload ID to Supabase storage */
+    const fileInput = document.getElementById("idUpload");
+    if (!fileInput.files.length) {
+      formStatus.textContent = "Please upload your ID.";
+      formStatus.className = "error";
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const carId = fd.get("car");
+    const ext = file.name.split(".").pop();
+    const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const path = `${carId}/${uniqueName}`;
+
+    const upload = await supabase.storage.from("ids").upload(path, file);
+    if (upload.error) {
+      formStatus.textContent = "Error uploading ID.";
+      formStatus.className = "error";
+      return;
+    }
+
+    const payload = Object.fromEntries(fd.entries());
+    payload.idFilePath = path;
+
+    /* Send booking to backend */
+    const res = await fetch("/api/booking", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      formStatus.textContent = "Error submitting booking.";
+      formStatus.className = "error";
+      return;
+    }
+
+    const json = await res.json();
+    lastBookingId = json.bookingId;
+
+    formStatus.textContent = "Booking received. Please now pay your £50 deposit.";
+    formStatus.className = "success";
+  });
+
+  /* ---------------------------------------------
+      DEPOSIT PAYMENT BUTTON
+  ----------------------------------------------*/
+  depositButton.onclick = async () => {
+    if (!lastBookingId) {
+      formStatus.textContent = "Please submit the booking first.";
+      formStatus.className = "error";
+      return;
+    }
+
+    formStatus.textContent = "Redirecting to Stripe…";
+    formStatus.className = "success";
+
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ bookingId: lastBookingId })
+    });
+
+    if (!res.ok) {
+      formStatus.textContent = "Error creating checkout session.";
+      formStatus.className = "error";
+      return;
+    }
+
+    const { url } = await res.json();
+    window.location.href = url;
+  };
+
+  /* ---------------------------------------------
+      INIT PAGE
+  ----------------------------------------------*/
+  document.getElementById("scrollToBooking").onclick = () => {
+    document.getElementById("bookingSection").scrollIntoView({behavior:"smooth"});
+  };
+
+  renderFleet();
+  populateCarSelects();
+  updateCalendar();
+</script>
+
+</body>
+</html>
