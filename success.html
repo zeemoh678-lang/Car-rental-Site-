@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payment Successful</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      text-align: center;
+    }
+    .box {
+      max-width: 450px;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 2rem;
+      border-radius: .8rem;
+    }
+    h1 {
+      color: #22c55e;
+      margin-bottom: .5rem;
+    }
+    p {
+      color: #9ca3af;
+      margin-bottom: 1.2rem;
+    }
+    #status {
+      margin-top: 1.2rem;
+      padding: .75rem;
+      border-radius: .5rem;
+      font-weight: 600;
+      background: #1e293b;
+      color: #e5e7eb;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h1>Deposit Paid 🎉</h1>
+    <p>Your payment was successful.</p>
+    <p>We're confirming your deposit now…</p>
+    <div id="status">Processing…</div>
+  </div>
+
+  <script>
+    async function confirmPayment() {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get("session_id");
+      const statusEl = document.getElementById("status");
+
+      if (!sessionId) {
+        statusEl.textContent = "Missing Stripe session ID.";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/confirm-payment?session_id=${sessionId}`);
+        const text = await res.text();
+
+        if (!res.ok) {
+          console.error(text);
+          statusEl.textContent = "Payment completed, but confirmation failed. Please contact us.";
+          return;
+        }
+
+        statusEl.textContent = "Deposit confirmed! You will receive an email shortly.";
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "Network error confirming payment.";
+      }
+    }
+
+    confirmPayment();
+  </script>
+
+</body>
+</html>
